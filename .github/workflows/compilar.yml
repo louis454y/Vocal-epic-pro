@@ -1,4 +1,4 @@
-name: Compilar Vocal Epic Pro (Windows)
+﻿name: Compilar Vocal Epic Pro (Windows)
 
 on:
   push:
@@ -7,21 +7,25 @@ on:
 
 jobs:
   compilar:
-    runs-on: windows-latest
+    runs-on: windows-2022
+
     steps:
-      - name: Descargar el código
+      - name: Descargar el codigo
         uses: actions/checkout@v4
 
-      - name: Configurar con CMake
-      - run: cmake -B build -A x64
+      - name: Configurar CMake
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
 
-      - name: Compilar (Release)
+      - name: Compilar Release
         run: cmake --build build --config Release --parallel
 
       - name: Preparar archivos finales
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist | Out-Null
+          if (!(Test-Path "build/VocalEpicPro_artefacts/Release/VST3")) {
+            throw "No se encontro el plugin VST3 compilado"
+          }
           Copy-Item -Recurse "build/VocalEpicPro_artefacts/Release/VST3" "dist/VST3"
           if (Test-Path "build/VocalEpicPro_artefacts/Release/Standalone") {
             Copy-Item -Recurse "build/VocalEpicPro_artefacts/Release/Standalone" "dist/Standalone"
